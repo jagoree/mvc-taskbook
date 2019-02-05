@@ -10,13 +10,13 @@ class Model {
     public $name;
     
     public function __construct($options)
-	{
+    {
         $this->name = $options['name'];
         $this->table = Inflector::tableize($this->name);
     }
     
     public function find($type = 'all', $query = [])
-	{
+    {
         $query += ['type' => $type];
         if ($type == 'byid' and isset($query['value'])) {
             $query['where'] = '`id` = ' . $query['value'];
@@ -26,22 +26,22 @@ class Model {
     }
     
     public function count($where = null)
-	{
+    {
         return (new Db())->read($this, ['fields' => ['COUNT(*) AS `count`'], 'type' => 'count', 'limit' => 1]);
     }
     
     public function create($data)
-	{
+    {
         return (new Db())->create($this, $data);
     }
     
     public function update($data)
-	{
+    {
         return (new Db())->update($this, $data);
     }
     
     public function validate($fields)
-	{
+    {
         return [];
     }
 }

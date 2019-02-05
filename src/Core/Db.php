@@ -10,7 +10,7 @@ class Db
     private $connection;
     
     public function __construct()
-	{
+    {
         $config = include APP . 'src' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'db.php';
         try {
             $this->connection = new PDO('mysql:host=' . $config['host'] . ';port=' . $config['port'] . ';dbname=' . $config['db_name'], $config['user'], $config['password']);
@@ -22,7 +22,7 @@ class Db
     }
     
     public function read(Model $model, $query)
-	{
+    {
         $type = $query['type'];
         $schema = [];
         foreach ($this->connection->query('DESCRIBE `' . $model->table . '`') as $column) {
@@ -76,7 +76,7 @@ class Db
     }
     
     public function create(Model $model, $data)
-	{
+    {
         $schema = $values = [];
         $this->prepareData($data);
         foreach ($this->connection->query('DESCRIBE `' . $model->table . '`') as $column) {
@@ -100,7 +100,7 @@ class Db
     }
     
     public function update(Model $model, $data)
-	{
+    {
 		$values = [];
         $this->prepareData($data);
         foreach ($this->connection->query('DESCRIBE `' . $model->table . '`') as $column) {
@@ -127,7 +127,7 @@ class Db
     }
     
     private function buildQuery($type, $data)
-	{
+    {
         extract($data);
         switch ($type) {
             case 'select':
@@ -143,7 +143,7 @@ class Db
     }
     
     private function prepareData(&$data)
-	{
+    {
         foreach ($data as &$value) {
             $value = trim(preg_replace('~\s{2,}~si', ' ', preg_replace('~<[^>]+>~si', ' ', $value)));
         }

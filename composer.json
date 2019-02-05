@@ -1,5 +1,5 @@
 {
-	"name":"jagor/mvc-tasks",
+	"name":"jagoree/mvc-taskbook",
 	"autoload": {
 		"psr-4": {
 			"App\\":"src/"

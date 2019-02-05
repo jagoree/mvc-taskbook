@@ -4,7 +4,7 @@ namespace App\Model;
 class Task extends Model
 {
     public function validate($fields, $update = false)
-	{
+    {
         $errors = [];
         foreach (['name', 'email', 'content'] as $field_name) {
             if ($field_name == 'email' and $update === true) {

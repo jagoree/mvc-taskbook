@@ -16,7 +16,7 @@ class Base
     protected $View;
     
     public function __construct($config = [])
-	{
+    {
         try {
             $this->name = $config['controller'];
             $this->action = $config['action'];
@@ -41,12 +41,12 @@ class Base
     }
     
     public function shutdown()
-	{
+    {
         
     }
     
     public function index()
-	{
+    {
         $query = ['limit' => 3, 'order' => ' ORDER BY `id` DESC'];
         if ($param = Router::getQuery('order') and $order = $this->getOrder($param)) {
             $query['order'] = $order;
@@ -65,7 +65,7 @@ class Base
     }
     
     public function add()
-	{
+    {
         $data = [];
         if (Router::isPost()) {
             if ($errors = $this->Model->validate($_POST)) {
@@ -82,7 +82,7 @@ class Base
     }
     
     public function edit($id = null)
-	{
+    {
         if (!$id or !is_numeric($id)) {
             throw new Exception(sprintf('Argument must be an integer, %s given', gettype($id)));
         }
@@ -111,7 +111,7 @@ class Base
     }
     
     private function getOrder($value)
-	{
+    {
         $order = '';
         switch ($value) {
             case 'name-up':

@@ -4,4 +4,4 @@ define('TPL_PATH', APP . 'src' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_S
 
 require_once APP . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-$app = new \App\Core\Application();
+new \App\Core\Application();

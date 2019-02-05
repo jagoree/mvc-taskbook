@@ -1,8 +1,8 @@
 <?php
 return [
     'host' => 'localhost',
-    'user' => 'root',
-    'password' => '',
-    'db_name' => 'beejee',
-    'port' => 3306
+    'user' => 'db_user',
+    'password' => '***',
+    'db_name' => 'db_name',
+    //'port' => 3306
 ];

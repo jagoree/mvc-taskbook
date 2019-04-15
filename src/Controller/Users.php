@@ -9,7 +9,7 @@ class Users extends Base
     protected $useModel = false;
     
     public function login()
-    {
+	{
         $error = null;
         if (Router::isPost()) {
             if ($_POST['login'] == 'admin' and md5($_POST['password']) == '202cb962ac59075b964b07152d234b70') {
@@ -23,7 +23,7 @@ class Users extends Base
     }
     
     public function logout()
-    {
+	{
         session_destroy();
         header('Location: /');
     }

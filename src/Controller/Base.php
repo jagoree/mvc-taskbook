@@ -14,9 +14,11 @@ class Base
     
     protected $useModel = true;
     protected $View;
-    
+    protected $limit = 3;
+
+
     public function __construct($config = [])
-    {
+	{
         try {
             $this->name = $config['controller'];
             $this->action = $config['action'];
@@ -41,13 +43,13 @@ class Base
     }
     
     public function shutdown()
-    {
+	{
         
     }
     
     public function index()
-    {
-        $query = ['limit' => 3, 'order' => ' ORDER BY `id` DESC'];
+	{
+        $query = ['limit' => $this->limit, 'order' => ['id' => 'DESC']];
         if ($param = Router::getQuery('order') and $order = $this->getOrder($param)) {
             $query['order'] = $order;
         }
@@ -55,23 +57,23 @@ class Base
             if ($page < 1) {
                 $page = 1;
             }
-            $offset = 3 * ($page - 1);
+            $offset = $this->limit * ($page - 1);
             $query['offset'] = $offset;
         } else {
             $page = 1;
         }
-        $data = $this->Model->find('all', $query);
+        $data = $this->Model->fetch('all', $query);
         $this->View->render(['rows' => $data, 'count_rows' => $this->Model->count(), 'current_page' => $page]);
     }
     
     public function add()
-    {
+	{
         $data = [];
         if (Router::isPost()) {
             if ($errors = $this->Model->validate($_POST)) {
                 $data['errors'] = $errors;
             } else {
-                if ($this->Model->create($_POST)) {
+                if ($this->Model->create($_POST + ['created' => date('Y-m-d H:i:s')])) {
                     $_SESSION['added'] = 1;
                     header('Location: /');
                     exit();
@@ -82,7 +84,7 @@ class Base
     }
     
     public function edit($id = null)
-    {
+	{
         if (!$id or !is_numeric($id)) {
             throw new Exception(sprintf('Argument must be an integer, %s given', gettype($id)));
         }
@@ -106,36 +108,26 @@ class Base
                 }
             }
         }
-        $row = $this->Model->find('byid', ['value' => $id]);
+        $row = $this->Model->fetch('byid', ['value' => $id]);
         $this->View->render(['row' => $row]);
     }
     
     private function getOrder($value)
-    {
-        $order = '';
+	{
         switch ($value) {
             case 'name-up':
-                $order = '`name` ASC';
-                break;
+                return ['name'];
             case 'name-down':
-                $order = '`name` DESC';
-                break;
+                return ['name' => 'DESC'];
             case 'email-up':
-                $order = '`email` ASC';
-                break;
+                return ['email'];
             case 'email-down':
-                $order = '`email` DESC';
-                break;
+                return ['email' => 'DESC'];
             case 'status-up':
-                $order = '`checked` ASC';
-                break;
+                return ['checked'];
             case 'status-down':
-                $order = '`checked` DESC';
-                break;
+                return ['checked' => 'DESC'];
         }
-        if ($order) {
-            $order = 'ORDER BY ' . $order;
-        }
-        return $order;
+        return null;
     }
 }

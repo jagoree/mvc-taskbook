@@ -4,7 +4,7 @@ namespace App\Controller;
 class Tasks extends Base
 {
     public function shutdown()
-    {
+	{
         if (isset($_SESSION['added'])) {
             unset($_SESSION['added']);
         }

@@ -3,7 +3,7 @@ namespace App\Core;
 
 class Router {
     public static function launche()
-    {
+	{
         $config = [
             'controller' => 'Tasks',
             'action' => 'index'
@@ -34,12 +34,12 @@ class Router {
     }
     
     public static function isPost()
-    {
+	{
         return strtolower($_SERVER['REQUEST_METHOD']) == 'post';
     }
     
     public static function getData($key)
-    {
+	{
         if (isset($_POST[$key])) {
             return $_POST[$key];
         }
@@ -47,7 +47,7 @@ class Router {
     }
     
     public static function getQuery($key)
-    {
+	{
         if (isset($_GET[$key])) {
             return $_GET[$key];
         }

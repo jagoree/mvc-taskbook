@@ -1,8 +1,14 @@
 <?php
 return [
-    'host' => 'localhost',
-    'user' => 'db_user',
-    'password' => '***',
-    'db_name' => 'db_name',
-    //'port' => 3306
+    'default' => [
+        'host' => 'localhost',
+        'user' => 'root',
+        'password' => 'pass',
+        'dbname' => 'beejee',
+        'className' => '\App\Database\Mysql'
+    ],
+    'sqlite' => [
+        'dbname' => '../tmp/beejee.sqlite',
+        'className' => '\App\Database\Sqlite'
+    ]
 ];

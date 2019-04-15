@@ -34,8 +34,4 @@ abstract class Driver implements DriverInterface
     {
         return $this->connection;
     }
-    
-    abstract public function create($data);
-    
-    abstract public function update($data);
 }

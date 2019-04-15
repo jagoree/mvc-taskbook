@@ -25,21 +25,6 @@ class Sqlite extends Driver
         return $this->_connect('sqlite:' . $this->_config['dbname'], $options);
     }
     
-    public function read($query)
-    {
-        return $this->connection->query("SELECT * FROM tasks");
-    }
-    
-    public function create($data)
-    {
-        ;
-    }
-    
-    public function update($data)
-    {
-        ;
-    }
-    
     private function checkIfDbExist()
     {
         if (!file_exists(realpath($this->_config['dbname']))) {

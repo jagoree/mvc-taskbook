@@ -25,28 +25,4 @@ class Mysql extends Driver
         }
         return $this->_connect('mysql:' . implode(';', $dsn), $options);
     }
-
-    public function read($query)
-    {
-        try {
-            $statement = $this->connection->query("SELECT * FROM tasks");
-            foreach ($statement as $a => $b) {
-                var_dump($a, $b);
-            }
-        } catch (\PDOException $e) {
-            var_dump($e->getMessage());
-        }
-        die();
-    }
-
-    public function update($data)
-    {
-        
-    }
-
-    public function create($data)
-    {
-        
-    }
-
 }

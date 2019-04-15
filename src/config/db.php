@@ -4,11 +4,11 @@ return [
         'host' => 'localhost',
         'user' => 'root',
         'password' => 'pass',
-        'dbname' => 'beejee',
+        'dbname' => 'dbname',
         'className' => '\App\Database\Mysql'
     ],
     'sqlite' => [
-        'dbname' => '../tmp/beejee.sqlite',
+        'dbname' => '../tmp/sqlite.db',
         'className' => '\App\Database\Sqlite'
     ]
 ];

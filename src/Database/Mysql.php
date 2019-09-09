@@ -25,4 +25,5 @@ class Mysql extends Driver
         }
         return $this->_connect('mysql:' . implode(';', $dsn), $options);
     }
+
 }

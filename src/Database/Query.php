@@ -9,10 +9,9 @@ namespace App\Database;
  */
 class Query
 {
-    private $Model = null;
-    
+
+    private $connection = null;
     private $table = null;
-    
     private $sqlParts = [
         'select' => [],
         'from' => [],
@@ -23,7 +22,6 @@ class Query
         'order' => null,
         'limit' => null
     ];
-    
     private $sqlTemplate = [
         'select' => 'SELECT %s',
         'update' => 'UPDATE %s',
@@ -34,23 +32,23 @@ class Query
         'order' => 'ORDER BY %s',
         'limit' => 'LIMIT %s'
     ];
-    
-    public function __construct($Model, $table)
+
+    public function __construct($connection, $table)
     {
-        $this->Model = $Model;
+        $this->connection = $connection;
         $this->table = $table;
         $this->sqlParts['from'] = "`{$table}`";
         $this->select('*');
         return $this;
     }
-    
+
     public function select($fields = [])
     {
         if (!is_array($fields)) {
             $fields = [$fields];
         }
         $fields = array_map(function ($field) {
-            if ($field != '*' and !preg_match('~[\(\)]+|all|distinct|distinctrow~i', $field)) {
+            if ($field != '*' and ! preg_match('~[\(\)]+|all|distinct|distinctrow~i', $field)) {
                 return "`{$field}`";
             }
             return $field;
@@ -58,7 +56,7 @@ class Query
         $this->sqlParts['select'] = $fields;
         return $this;
     }
-    
+
     public function where($expression = null)
     {
         $query = $and = $values = [];
@@ -75,11 +73,11 @@ class Query
                 $key = ':c' . $i;
                 if (is_array($value)) {
                     $key = '(' . implode(',', array_map(function ($value) use (&$i, &$values) {
-                        $key = ':c' . $i;
-                        $values[$key] = (!is_numeric($value) ? "'{$value}'" : $value);
-                        $i ++;
-                        return $key;
-                    }, $value)) . ')';
+                                        $key = ':c' . $i;
+                                        $values[$key] = (!is_numeric($value) ? "'{$value}'" : $value);
+                                        $i ++;
+                                        return $key;
+                                    }, $value)) . ')';
                 } else {
                     $values[$key] = $value;
                 }
@@ -91,11 +89,12 @@ class Query
         $this->sqlParts['where'] = compact('query', 'values');
         return $this;
     }
-    
-    public function order($order = []) {
+
+    public function order($order = [])
+    {
         $expr = [];
         foreach ($order as $key => $value) {
-            if (is_numeric($key) or is_string($key) and !in_array(strtolower($value), ['asc', 'desc'])) {
+            if (is_numeric($key) or is_string($key) and ! in_array(strtolower($value), ['asc', 'desc'])) {
                 $key = $value;
                 $value = 'ASC';
             }
@@ -104,18 +103,19 @@ class Query
         $this->sqlParts['order'] = implode(', ', $expr);
         return $this;
     }
-    
-    public function limit($limit = 1) {
+
+    public function limit($limit = 1)
+    {
         $this->sqlParts['limit'] = $limit;
         return $this;
     }
-    
+
     public function offset($offset = 1)
     {
         $this->sqlParts['limit'] = implode(',', [$offset, $this->sqlParts['limit']]);
         return $this;
     }
-    
+
     public function insert($data)
     {
         $this->sqlParts['from'] = $this->sqlParts['select'] = $placeholders = $values = $columns = [];
@@ -128,7 +128,7 @@ class Query
         $this->sqlParts['insert'] = ['query' => implode(' ', ["`{$this->table}`", '(' . implode(',', $columns) . ')', 'VALUES (' . implode(',', $placeholders) . ')']), 'values' => $values];
         return $this;
     }
-    
+
     public function update($table = null)
     {
         $this->sqlParts['from'] = $this->sqlParts['select'] = [];
@@ -138,7 +138,7 @@ class Query
         $this->sqlParts['update'] = "`{$table}`";
         return $this;
     }
-    
+
     public function set($data)
     {
         $placeholders = $values = $columns = [];
@@ -150,18 +150,18 @@ class Query
         $this->sqlParts['set'] = ['query' => implode(', ', $vars), 'values' => $values];
         return $this;
     }
-    
+
     public function all()
     {
         return $this->execute()->fetchAll();
     }
-    
+
     public function first()
     {
         $this->limit();
         return $this->execute()->fetch();
     }
-    
+
     public function execute()
     {
         $sql = $values = [];
@@ -178,11 +178,12 @@ class Query
             }
             $sql[] = sprintf($this->sqlTemplate[$part], $value);
         }
-        $statement = $this->Model->getConnection()->prepare(implode(' ', $sql));
+        $statement = $this->connection->prepare(implode(' ', $sql));
         if (!$statement) {
-            throw new \Exception('Query error: ' . $this->Model->getConnection()->errorInfo()[2]);
+            throw new \Exception('Query error: ' . $this->connection->errorInfo()[2]);
         }
         $statement->execute($values);
         return $statement;
     }
+
 }

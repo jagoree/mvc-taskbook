@@ -1,24 +1,28 @@
 <?php
+
 namespace App\Controller;
 
 use App\Core\Router;
 use App\Core\Inflector;
 use App\View\View;
 
-class Base
+class Base implements ControllerInterface
 {
-    public $name;
+
     public $action;
-    public $modelClass;
+
+    /**
+     *
+     * @var \App\Model\Model
+     */
     public $Model;
-    
     protected $useModel = true;
     protected $View;
+    protected $render = true;
     protected $limit = 3;
 
-
     public function __construct($config = [])
-	{
+    {
         try {
             $this->name = $config['controller'];
             $this->action = $config['action'];
@@ -31,24 +35,32 @@ class Base
                 if (!method_exists($this, $config['action'])) {
                     throw new \Exception(sprintf('You should create method %s in controller %s', $config['action'], $config['controller']));
                 }
-                $this->modelClass = $modelName;
-                $this->{$modelName} = $this->Model = new $modelClass(['name' => $modelName]);
+                $this->{$modelName} = $this->Model = new $modelClass();
             }
             $this->View = new View($this);
-            $callable = [$this, $config['action']];
-            $callable((isset($config['id']) ? $config['id'] : null));
         } catch (\Exception $ex) {
             echo $ex->getMessage();
         }
     }
-    
+
+    public function render(array $data = [])
+    {
+        if ($this->render === false) {
+            return;
+        }
+        if (!$this->View) {
+            $this->View = new View($this);
+        }
+        $this->View->render($data);
+    }
+
     public function shutdown()
-	{
+    {
         
     }
-    
+
     public function index()
-	{
+    {
         $query = ['limit' => $this->limit, 'order' => ['id' => 'DESC']];
         if ($param = Router::getQuery('order') and $order = $this->getOrder($param)) {
             $query['order'] = $order;
@@ -63,11 +75,11 @@ class Base
             $page = 1;
         }
         $data = $this->Model->fetch('all', $query);
-        $this->View->render(['rows' => $data, 'count_rows' => $this->Model->count(), 'current_page' => $page]);
+        $this->render(['rows' => $data, 'count_rows' => $this->Model->count(), 'current_page' => $page]);
     }
-    
+
     public function add()
-	{
+    {
         $data = [];
         if (Router::isPost()) {
             if ($errors = $this->Model->validate($_POST)) {
@@ -75,17 +87,16 @@ class Base
             } else {
                 if ($this->Model->create($_POST + ['created' => date('Y-m-d H:i:s')])) {
                     $_SESSION['added'] = 1;
-                    header('Location: /');
-                    exit();
+                    $this->redirect();
                 }
             }
         }
-        $this->View->render($data);
+        $this->render($data);
     }
-    
+
     public function edit($id = null)
-	{
-        if (!$id or !is_numeric($id)) {
+    {
+        if (!$id or ! is_numeric($id)) {
             throw new Exception(sprintf('Argument must be an integer, %s given', gettype($id)));
         }
         if (!isset($_SESSION['auth'])) {
@@ -103,17 +114,24 @@ class Base
                 }
                 if ($this->Model->update($data)) {
                     $_SESSION['edited'] = 1;
-                    header('Location: /');
-                    exit();
                 }
+                $this->redirect();
             }
         }
         $row = $this->Model->fetch('byid', ['value' => $id]);
-        $this->View->render(['row' => $row]);
+        $this->render(['row' => $row]);
     }
-    
+
+    protected function redirect($url = '/', $exit = true)
+    {
+        header("Location: {$url}");
+        if ($exit === true) {
+            exit;
+        }
+    }
+
     private function getOrder($value)
-	{
+    {
         switch ($value) {
             case 'name-up':
                 return ['name'];
@@ -130,4 +148,5 @@ class Base
         }
         return null;
     }
+
 }

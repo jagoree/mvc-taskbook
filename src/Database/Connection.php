@@ -1,18 +1,20 @@
 <?php
+
 namespace App\Database;
 
 class Connection
 {
+
     protected static $connection = null;
-    
     private static $mapConnections = [
         'default' => 'Mysql'
     ];
-    
-    public static function get($name = 'default') {
+
+    public static function get($name)
+    {
         $config = include APP . 'src' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'db.php';
         if (!static::$connection) {
-            if (empty($config[$name]['className']) and !isset(static::$mapConnections[$name])) {
+            if (empty($config[$name]['className']) and ! isset(static::$mapConnections[$name])) {
                 throw new Exception(sprintf('Connection adapter for type %s not found', $name));
             }
             $className = $config[$name]['className'];
@@ -20,4 +22,5 @@ class Connection
         }
         return static::$connection;
     }
+
 }

@@ -20,7 +20,8 @@ class Query
         'insert' => null,
         'where' => null,
         'order' => null,
-        'limit' => null
+        'limit' => null,
+        'offset' => null
     ];
     private $sqlTemplate = [
         'select' => 'SELECT %s',
@@ -30,7 +31,8 @@ class Query
         'from' => 'FROM %s',
         'where' => 'WHERE %s',
         'order' => 'ORDER BY %s',
-        'limit' => 'LIMIT %s'
+        'limit' => 'LIMIT %s',
+        'offset' => 'OFFSET %s'
     ];
 
     public function __construct($connection, $table)
@@ -106,13 +108,29 @@ class Query
 
     public function limit($limit = 1)
     {
-        $this->sqlParts['limit'] = $limit;
+        $this->sqlParts['limit'] = [
+            'query' => ':limit',
+            'values' => [
+                ':limit' => [
+                    'value' => $limit,
+                    'type' => \PDO::PARAM_INT
+                ]
+            ]
+        ];
         return $this;
     }
 
     public function offset($offset = 1)
     {
-        $this->sqlParts['limit'] = implode(',', [$offset, $this->sqlParts['limit']]);
+        $this->sqlParts['offset'] = [
+            'query' => ':offset',
+            'values' => [
+                ':offset' => [
+                    'value' => $offset,
+                    'type' => \PDO::PARAM_INT
+                ]
+            ]
+        ];
         return $this;
     }
 
@@ -125,7 +143,14 @@ class Query
             $placeholders[] = $key;
             $values[$key] = $value;
         }
-        $this->sqlParts['insert'] = ['query' => implode(' ', ["`{$this->table}`", '(' . implode(',', $columns) . ')', 'VALUES (' . implode(',', $placeholders) . ')']), 'values' => $values];
+        $this->sqlParts['insert'] = [
+            'query' => implode(' ', [
+                "`{$this->table}`",
+                '(' . implode(',', $columns) . ')',
+                'VALUES (' . implode(',', $placeholders) . ')'
+            ]),
+            'values' => $values
+        ];
         return $this;
     }
 
@@ -147,7 +172,10 @@ class Query
             $vars[] = implode(' = ', ["`{$key}`", $_key]);
             $values[$_key] = $value;
         }
-        $this->sqlParts['set'] = ['query' => implode(', ', $vars), 'values' => $values];
+        $this->sqlParts['set'] = [
+            'query' => implode(', ', $vars),
+            'values' => $values
+        ];
         return $this;
     }
 
@@ -179,10 +207,19 @@ class Query
             $sql[] = sprintf($this->sqlTemplate[$part], $value);
         }
         $statement = $this->connection->prepare(implode(' ', $sql));
+        foreach ($values as $key => $value) {
+            $type = \PDO::PARAM_STR;
+            if (is_array($value) and isset($value['type'])) {
+                $type = $value['type'];
+                $value = $value['value'];
+            }
+            $statement->bindValue($key, $value, $type);
+        }
         if (!$statement) {
             throw new \Exception('Query error: ' . $this->connection->errorInfo()[2]);
         }
-        $statement->execute($values);
+        $statement->execute();
+        
         return $statement;
     }
 

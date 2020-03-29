@@ -61,7 +61,10 @@ class Base implements ControllerInterface
 
     public function index()
     {
-        $query = ['limit' => $this->limit, 'order' => ['id' => 'DESC']];
+        $query = [
+            'limit' => $this->limit,
+            'order' => ['id' => 'DESC']
+        ];
         if ($param = Router::getQuery('order') and $order = $this->getOrder($param)) {
             $query['order'] = $order;
         }
@@ -75,7 +78,11 @@ class Base implements ControllerInterface
             $page = 1;
         }
         $data = $this->Model->fetch('all', $query);
-        $this->render(['rows' => $data, 'count_rows' => $this->Model->count(), 'current_page' => $page]);
+        $this->render([
+            'rows' => $data,
+            'count_rows' => $this->Model->count(),
+            'current_page' => $page
+        ]);
     }
 
     public function add()

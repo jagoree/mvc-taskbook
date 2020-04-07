@@ -20,7 +20,7 @@ use App\Core\Router;
     <div class="col-2"><?= $row['name']; ?></div>
     <div class="col-2"><a href="mailto:<?= $row['email']; ?>"><?= $row['email']; ?></a></div>
     <div class="col-4">
-        <p><?= $row['content']; ?></p>
+        <p><?= htmlspecialchars($row['content']); ?></p>
     </div>
     <div class="col-2"><?= date('d.m.Y H:i:s', strtotime($row['created'])); ?></div>
     <div class="col-1"><?= $row['checked'] ? '&#10004;': ''; ?></div>

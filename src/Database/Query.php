@@ -3,9 +3,9 @@
 namespace App\Database;
 
 /**
- * Description of Query
+ * Builds and executes SQL queries
  *
- * @author zhentos
+ * @author jagoree
  */
 class Query
 {

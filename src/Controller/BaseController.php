@@ -6,9 +6,17 @@ use App\Core\Router;
 use App\Core\Inflector;
 use App\View\View;
 
-class Base implements ControllerInterface
+/**
+ * Base controller class
+ * @author jagoree
+ */
+class BaseController implements ControllerInterface
 {
 
+    /**
+     *
+     * @var string Current controller action
+     */
     public $action;
 
     /**
@@ -16,9 +24,20 @@ class Base implements ControllerInterface
      * @var \App\Model\Model
      */
     public $Model;
+    /**
+     *
+     * @var bool Use model in current controller
+     */
     protected $useModel = true;
+    /**
+     *
+     * @var \App\View\View View object 
+     */
     protected $View;
-    protected $render = true;
+    /**
+     *
+     * @var int Number of rows
+     */
     protected $limit = 3;
 
     public function __construct($config = [])
@@ -30,41 +49,45 @@ class Base implements ControllerInterface
                 $modelName = Inflector::classify($config['controller']);
                 $modelClass = '\App\Model\\' . $modelName;
                 if (!class_exists($modelClass)) {
-                    throw new \Exception(sprintf('Model %s not found for controller %s', $modelName, $config['controller']));
+                    throw new \RuntimeException(sprintf('Model %s not found for controller %s', $modelName, $config['controller']));
                 }
                 if (!method_exists($this, $config['action'])) {
-                    throw new \Exception(sprintf('You should create method %s in controller %s', $config['action'], $config['controller']));
+                    throw new \RuntimeException(sprintf('You should create method %s in controller %s', $config['action'], $config['controller']));
                 }
                 $this->{$modelName} = $this->Model = new $modelClass();
             }
+            
             $this->View = new View($this);
         } catch (\Exception $ex) {
-            echo $ex->getMessage();
+            printf("<pre>%s\n%s</pre>", $ex->getMessage(), $ex->getTraceAsString());
         }
     }
 
-    public function render(array $data = [])
+    /**
+     * @inheritDoc
+     */
+    public function render(array $data = [], string $name = null)
     {
-        if ($this->render === false) {
-            return;
-        }
         if (!$this->View) {
             $this->View = new View($this);
         }
-        $this->View->render($data);
+        $this->View->render($data, $name);
     }
 
+    /**
+     * Calls after view file has been rendered
+     */
     public function shutdown()
     {
         
     }
 
+    /**
+     * Controller index action
+     */
     public function index()
     {
-        $query = [
-            'limit' => $this->limit,
-            'order' => ['id' => 'DESC']
-        ];
+        $query = ['limit' => $this->limit, 'order' => ['id' => 'DESC']];
         if ($param = Router::getQuery('order') and $order = $this->getOrder($param)) {
             $query['order'] = $order;
         }
@@ -78,13 +101,12 @@ class Base implements ControllerInterface
             $page = 1;
         }
         $data = $this->Model->fetch('all', $query);
-        $this->render([
-            'rows' => $data,
-            'count_rows' => $this->Model->count(),
-            'current_page' => $page
-        ]);
+        $this->render(['rows' => $data, 'count_rows' => $this->Model->count(), 'current_page' => $page]);
     }
 
+    /**
+     * Controller add action
+     */
     public function add()
     {
         $data = [];
@@ -101,10 +123,17 @@ class Base implements ControllerInterface
         $this->render($data);
     }
 
-    public function edit($id = null)
+    /**
+     * Controller edit action
+     * 
+     * @param int $id ID of editing record
+     * @throws InvalidArgumentException
+     * @throws Exception
+     */
+    public function edit(int $id = null)
     {
         if (!$id or ! is_numeric($id)) {
-            throw new Exception(sprintf('Argument must be an integer, %s given', gettype($id)));
+            throw new InvalidArgumentException(sprintf('Argument must be an integer, %s given', gettype($id)));
         }
         if (!isset($_SESSION['auth'])) {
             throw new Exception('Доступ закрыт!');
@@ -129,6 +158,11 @@ class Base implements ControllerInterface
         $this->render(['row' => $row]);
     }
 
+    /**
+     * Redirects to URL
+     * @param string $url
+     * @param bool $exit
+     */
     protected function redirect($url = '/', $exit = true)
     {
         header("Location: {$url}");
@@ -137,6 +171,12 @@ class Base implements ControllerInterface
         }
     }
 
+    /**
+     * Returns order conditions
+     * 
+     * @param string $value
+     * @return string|null
+     */
     private function getOrder($value)
     {
         switch ($value) {

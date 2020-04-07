@@ -3,9 +3,9 @@
 namespace App\Database;
 
 /**
- * Description of Mysql
+ * Mysql driver
  *
- * @author zhentos
+ * @author jagoree
  */
 class Mysql extends Driver
 {

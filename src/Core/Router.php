@@ -2,30 +2,44 @@
 
 namespace App\Core;
 
+/**
+ * Parses the requested URL into controller, action and parameters. Lanches application
+ * 
+ * @author jagoree
+ */
 class Router
 {
 
+    /**
+     * Launches the application
+     * 
+     * @throws \RuntimeException
+     */
     public static function launche()
     {
         session_start();
         $config = static::parseRequest();
         try {
-            $className = 'App\Controller\\' . $config['controller'];
+            $className = 'App\Controller\\' . $config['controller'] . 'Controller';
             if (!class_exists($className)) {
-                throw new \Exception(sprintf('Controller class %s not found', $className));
+                throw new \RuntimeException(sprintf('Controller class %s not found', $className));
             }
             $controller = new $className($config);
             $action = $config['action'];
             if (!method_exists($controller, $config['action'])) {
-                $controller = 'App\\Controller\\Error';
-                $action = 'error404';
+                throw new \RuntimeException(sprintf('Controller action %s not found', $config['action']));
             }
-        [$controller, $config['action']]($config['id'] ?? null);
+            [$controller, $config['action']]($config['id'] ?? null);
         } catch (\Exception $ex) {
-            echo $ex->getMessage();
+            printf("<pre>%s\n%s</pre>", $ex->getMessage(), $ex->getTraceAsString());
         }
     }
 
+    /**
+     * Parses the requested URL into controller, action and parameters.
+     * 
+     * @return array
+     */
     public static function parseRequest()
     {
         $components = parse_url($_SERVER['REQUEST_URI']);
@@ -49,6 +63,11 @@ class Router
         return $config;
     }
 
+    /**
+     * Checks if requested method is POST
+     * 
+     * @return (bool)
+     */
     public static function isPost()
     {
         return strtolower($_SERVER['REQUEST_METHOD']) == 'post';

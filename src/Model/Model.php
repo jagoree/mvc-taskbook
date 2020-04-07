@@ -1,11 +1,16 @@
 <?php
 
-namespace app\Model;
+namespace App\Model;
 
 use App\Core\Inflector;
 use App\Database\Connection;
 use App\Database\Query;
 
+/**
+ * Base model class
+ * 
+ * @author jagoree
+ */
 class Model
 {
 
@@ -25,7 +30,9 @@ class Model
     {
         $query = $this->query();
         if ($type == 'byid' and isset($options['value'])) {
-            $query->where(['id' => $options['value']]);
+            $query->where([
+                'id' => $options['value']
+            ]);
             unset($options['where'], $options['value']);
             $type = 'first';
         }

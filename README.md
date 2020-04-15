@@ -9,4 +9,6 @@ MySQL 5.5 or higher or SqLite
 
 Clone this project, go to the diretory where you cloned it and type:
 
-```composer install```
+```bash
+composer install
+```

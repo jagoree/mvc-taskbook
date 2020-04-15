@@ -4,3 +4,9 @@ This is simple task-book manager from test assignment.
 
 PHP7.0 or higher    
 MySQL 5.5 or higher or SqLite
+
+## Installation
+
+Clone this project, go to the diretory where you cloned it and type:
+
+```composer install```

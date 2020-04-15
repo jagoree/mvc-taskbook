@@ -10,8 +10,22 @@ namespace App\Database;
 class Query
 {
 
+    /**
+     *
+     * @var \App\Database\DriverInterface Database connection instance
+     */
     private $connection = null;
+    
+    /**
+     *
+     * @var string|null Table name for the query used
+     */
     private $table = null;
+    
+    /**
+     *
+     * @var array SQL fragments for a query
+     */
     private $sqlParts = [
         'select' => [],
         'from' => [],
@@ -23,6 +37,11 @@ class Query
         'limit' => null,
         'offset' => null
     ];
+    
+    /**
+     *
+     * @var array SQL template for a query
+     */
     private $sqlTemplate = [
         'select' => 'SELECT %s',
         'update' => 'UPDATE %s',
@@ -35,6 +54,12 @@ class Query
         'offset' => 'OFFSET %s'
     ];
 
+    /**
+     * 
+     * @param \App\Database\DriverInterface $connection
+     * @param string $table
+     * @return $this
+     */
     public function __construct($connection, $table)
     {
         $this->connection = $connection;
@@ -44,6 +69,11 @@ class Query
         return $this;
     }
 
+    /**
+     * 
+     * @param array|string $fields Selected field(s) for the query
+     * @return $this
+     */
     public function select($fields = [])
     {
         if (!is_array($fields)) {
@@ -189,24 +219,28 @@ class Query
         $this->limit();
         return $this->execute()->fetch();
     }
+    
+    public function getSql()
+    {
+        $sql = $this->createSql();
+        $values = $this->buildParams();
+        
+        $statement = $this->connection->prepare($sql);
+        
+        $values = array_map(function ($item, $key) {
+            return $key . ' = ' . $item['value'];
+        }, $values, array_keys($values));
+        
+        return sprintf('%s [%s]', $statement->queryString, implode(', ', $values));
+    }
 
     public function execute()
     {
-        $sql = $values = [];
-        foreach ($this->sqlParts as $part => $value) {
-            if (empty($value) or isset($value['values']) and empty($value['values'])) {
-                continue;
-            }
-            if (isset($value['values'])) {
-                $values += $value['values'];
-                $value = $value['query'];
-            }
-            if (is_array($value)) {
-                $value = implode(', ', $value);
-            }
-            $sql[] = sprintf($this->sqlTemplate[$part], $value);
-        }
-        $statement = $this->connection->prepare(implode(' ', $sql));
+        $sql = $this->createSql();
+        $values = $this->buildParams();
+        
+        $statement = $this->connection->prepare($sql);
+        
         foreach ($values as $key => $value) {
             $type = \PDO::PARAM_STR;
             if (is_array($value) and isset($value['type'])) {
@@ -221,6 +255,38 @@ class Query
         $statement->execute();
         
         return $statement;
+    }
+    
+    private function createSql()
+    {
+        $sql = [];
+        foreach ($this->sqlParts as $part => $value) {
+            if (empty($value) or isset($value['values']) and empty($value['values'])) {
+                continue;
+            }
+            if (isset($value['values'])) {
+                $value = $value['query'];
+            }
+            if (is_array($value)) {
+                $value = implode(', ', $value);
+            }
+            $sql[] = sprintf($this->sqlTemplate[$part], $value);
+        }
+        return implode(' ', $sql);
+    }
+    
+    private function buildParams()
+    {
+        $values = [];
+        foreach ($this->sqlParts as $part => $value) {
+            if (empty($value) or isset($value['values']) and empty($value['values'])) {
+                continue;
+            }
+            if (isset($value['values'])) {
+                $values += $value['values'];
+            }
+        }
+        return $values;
     }
 
 }

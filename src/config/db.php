@@ -1,14 +1,17 @@
 <?php
+use App\Database\Mysql;
+use App\Database\Sqlite;
+
 return [
     'default' => [
         'host' => 'localhost',
-        'user' => 'root',
-        'password' => 'pass',
-        'dbname' => 'dbname',
-        'className' => '\App\Database\Mysql'
+        'user' => 'db_user',
+        'password' => 'db_pass',
+        'dbname' => 'db_name',
+        'className' => Mysql::class
     ],
     'sqlite' => [
-        'dbname' => '../tmp/sqlite.db',
-        'className' => '\App\Database\Sqlite'
+        'dbname' => APP . 'tmp' . DIRECTORY_SEPARATOR . 'sqlite.db',
+        'className' => Sqlite::class
     ]
 ];

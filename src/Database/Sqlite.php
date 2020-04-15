@@ -16,8 +16,13 @@ class Sqlite extends Driver
             'user' => null,
             'password' => null
         ];
+        $pathToDb = dirname($this->_config['dbname']);
+        if (!is_dir($pathToDb)) {
+            mkdir($pathToDb, 0777, true);
+        }
+        $connection = $this->_connect('sqlite:' . $this->_config['dbname'], $options);
         $this->checkIfDbExist();
-        return $this->_connect('sqlite:' . $this->_config['dbname'], $options);
+        return $connection;
     }
 
     private function checkIfDbExist()

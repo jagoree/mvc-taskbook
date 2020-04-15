@@ -16,7 +16,7 @@ class Task extends Model
                 $errors[$field_name] = 'Поле нужно заполнить!';
             }
         }
-        if (!$update and ! isset($erros['email']) and ! filter_var($fields['email'], FILTER_VALIDATE_EMAIL)) {
+        if (!$update and ! isset($errors['email']) and ! filter_var($fields['email'], FILTER_VALIDATE_EMAIL)) {
             $errors['email'] = 'Некорректный адрес E-mail';
         }
         if (!isset($errors['content']) and mb_strlen($fields['content']) < 10) {

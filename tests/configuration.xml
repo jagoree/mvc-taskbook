@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<phpunit colors="false">
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../src/Core</directory>
+            <directory suffix=".php">../src/Database</directory>
+            <directory suffix=".php">../src/Model</directory>
+        </whitelist>
+    </filter>
+</phpunit>
